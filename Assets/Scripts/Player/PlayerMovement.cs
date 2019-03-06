@@ -7,20 +7,20 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private Vector3 movementInput;
 
-    [SerializeField] private string VerticalAxisName = "VerticalPlayer";
-    [SerializeField] private string HorizontalAxisName = "HorizontalPlayer";
-
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float friction = 1f;
-    [SerializeField] private float gravity = 9.8f;
+    [SerializeField] private float maxSpeed = 30f;
+    [SerializeField] private float jumpForce = 50f;
 
     private bool isGrounded;
+
+    private int groundLayer;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         isGrounded = false;
+        groundLayer = LayerMask.NameToLayer("Ground");
     }
 
     // Update is called once per frame
@@ -35,22 +35,14 @@ public class PlayerMovement : MonoBehaviour
         {
             Move();
         }
-
-        if (isGrounded)
-        {
-            ApplyFriction();
-        }
-        else
-        {
-            ApplyGravity();
-        }
     }
 
-    // Get the input from WASD
+    // Get player's input
     private void GetInput()
     {
+        // Movement input (WASD)
         movementInput = Vector3.zero;
-        
+
         if (Input.GetKey(KeyCode.A))
         {
             movementInput += Vector3.left;
@@ -67,37 +59,54 @@ public class PlayerMovement : MonoBehaviour
         {
             movementInput += Vector3.back;
         }
+
+        // Jump input
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
     }
 
     // Move player in whatever the input direction is.
     private void Move()
     {
-        rb.AddForce(movementInput.normalized * moveSpeed * Time.deltaTime, ForceMode.Force);
+        if (rb.velocity.magnitude < maxSpeed)
+        {
+            rb.AddForce(movementInput.normalized * moveSpeed * Time.deltaTime, ForceMode.VelocityChange);
+        }
+        else
+        {
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+        }
     }
 
-    // Apply friction to player (backward acceleration).
-    private void ApplyFriction()
+    // Jump only if the player is grounded.
+    private void Jump()
     {
-        rb.AddForce(-rb.velocity.normalized * friction * Time.deltaTime, ForceMode.Acceleration);
+        if (isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
 
-    // Apply gravity to player (downward acceleration).
-    private void ApplyGravity()
+    // Kill the player when the hammer falls on them or when they fall off the map.
+    public void Kill()
     {
-        rb.AddForce(Vector3.down * gravity * Time.deltaTime, ForceMode.Acceleration);
+        Destroy(gameObject);
     }
 
+    /* ------------------------ COLLISION --------------------------------- */ 
+    // Collision check with ground to see if player is grounded.
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        if (collision.gameObject.layer == groundLayer)
         {
             isGrounded = true;
         }
     }
-
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        if (collision.gameObject.layer == groundLayer)
         {
             isGrounded = false;
         }
