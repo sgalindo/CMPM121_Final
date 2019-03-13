@@ -9,10 +9,13 @@ public class Hammer : MonoBehaviour
     private bool hammerPressed = false; // If the hammer down button is pressed
 
     private Rigidbody rb;                           // Hammer's Rigidbody component
-    [SerializeField] float moveSpeed = 1.0f;        // Speed at which the hammer machine moves (crane-like movement)
-    [SerializeField] float hammerDownSpeed = 10f;   // Speed at which the hammer drops
-    [SerializeField] float hammerUpSpeed = 2f;      // Speed at which the hammer is raised
-    [SerializeField] float hammerCooldown = 2f;     // Time to wait before hammer is raised after hitting the ground
+    [SerializeField] private float moveSpeed = 1.0f;        // Speed at which the hammer machine moves (crane-like movement)
+    [SerializeField] private float hammerDownSpeed = 10f;   // Speed at which the hammer drops
+    [SerializeField] private float hammerUpSpeed = 2f;      // Speed at which the hammer is raised
+    [SerializeField] private float hammerCooldown = 2f;     // Time to wait before hammer is raised after hitting the ground
+    [SerializeField] private float t = 1.5f; // t value for easing function
+
+    //private float hammerCurrentSpeed = 1f;
 
     // References to children of Hammer
     private GameObject hammerHead;
@@ -28,6 +31,7 @@ public class Hammer : MonoBehaviour
     private bool hammerDropping = false; // If hammer is currently dropping
 
     private float timestamp = 0f; // Timestamp variable for cooldown checks
+    private float startTime = 0f;
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +43,7 @@ public class Hammer : MonoBehaviour
         hammerCeilingHeight = hammerHead.transform.position.y;
 
         // Y value of the lowest point for the hammer = shadow's y position + (height of hammer / 2)
-        hammerFloorHeight = shadow.transform.position.y + (hammerHead.GetComponent<Collider>().bounds.size.y / 2);
+        hammerFloorHeight = shadow.transform.position.y + (hammerHead.GetComponent<Collider>().bounds.size.y / 2) - 1f;
         rb = GetComponent<Rigidbody>();
     }
 
@@ -115,6 +119,7 @@ public class Hammer : MonoBehaviour
         }
         else if (hammerDown && Time.time > timestamp)
         {
+            if (startTime == 0f) startTime = Time.time;
             RaiseHammer();
         }
     }
@@ -139,14 +144,19 @@ public class Hammer : MonoBehaviour
             hammerDown = true;
             hammerDropping = false;
             timestamp = Time.time + hammerCooldown;
+            startTime = 0f;
         }
     }
 
     // Moves hammer head back towards ceiling by step increments. Once it reaches the ceiling, it stops.
     private void RaiseHammer()
     {
+        //float distCovered = (Time.time - startTime) * hammerUpSpeed * Time.deltaTime;
+        //float fracJourney = distCovered / Vector3.Distance(hammerHead.transform.position, hammerCeiling);
         float step = hammerUpSpeed * Time.deltaTime;
+
         hammerHead.transform.position = Vector3.MoveTowards(hammerHead.transform.position, hammerCeiling, step);
+        //hammerHead.transform.position = new Vector3(hammerHead.transform.position.x, EaseInOutQuad(hammerHead.transform.position.y, hammerCeiling.y, fracJourney), hammerHead.transform.position.z);
         if (hammerHead.transform.position == hammerCeiling)
         {
             if (hammerDown)
@@ -161,9 +171,23 @@ public class Hammer : MonoBehaviour
         }
     }
 
+    private float EaseDown(float value)
+    {
+        return value * t;
+    }
+
     // Public accessor for hammerDown.
     public bool GetHammerDown()
     {
         return hammerDown;
+    }
+
+    public static float EaseInOutQuad(float start, float end, float value)
+    {
+        value /= .5f;
+        end -= start;
+        if (value < 1) return end * 0.5f * value * value + start;
+        value--;
+        return -end * 0.5f * (value * (value - 2) - 1) + start;
     }
 }

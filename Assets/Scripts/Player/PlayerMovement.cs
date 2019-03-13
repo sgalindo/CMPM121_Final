@@ -7,17 +7,21 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody rb;
     private Vector3 movementInput;
 
+    /* ----------- Physics Parameters ------------- */
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float maxSpeed = 30f;
     [SerializeField] private float jumpForce = 50f;
 
+    /* --- Jump Variables --- */
     private bool isGrounded;
-
     private int groundLayer;
+
+    private GameManager gm;
 
     // Start is called before the first frame update
     void Start()
     {
+        gm = GameObject.Find("GameManager(Clone)").GetComponent<GameManager>();
         rb = GetComponent<Rigidbody>();
         isGrounded = false;
         groundLayer = LayerMask.NameToLayer("Ground");
@@ -27,6 +31,10 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         GetInput();
+        if (transform.position.y <= -50f)
+        {
+            Kill();
+        }
     }
 
     private void FixedUpdate()
@@ -86,12 +94,14 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false;
         }
     }
 
     // Kill the player when the hammer falls on them or when they fall off the map.
     public void Kill()
     {
+        gm.GameOver(false);
         Destroy(gameObject);
     }
 
@@ -101,14 +111,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (collision.gameObject.layer == groundLayer)
         {
-            isGrounded = true;
+            if (!isGrounded) isGrounded = true;
+            transform.parent = collision.transform;
         }
     }
     private void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.layer == groundLayer)
         {
-            isGrounded = false;
+            transform.parent = null;
         }
     }
 }

@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class HammerCrush : MonoBehaviour
 {
+    [SerializeField] private float destructionFactor = 0.5f;
     private Hammer hammer; // Reference to parent
+    private Collider col;
 
     // Start is called before the first frame update
     void Start()
     {
         hammer = GetComponentInParent<Hammer>();
+        col = GetComponent<Collider>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -22,6 +25,11 @@ public class HammerCrush : MonoBehaviour
             if (playerScript != null)
             {
                 playerScript.Kill();
+            }
+            else if (other.tag == "Tile")
+            {
+                if (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(other.transform.position.x, other.transform.position.z)) < (col.bounds.extents.x + destructionFactor))
+                    other.gameObject.GetComponent<Tile>().Kill();
             }
         }
     }
