@@ -35,7 +35,7 @@ public class WinTile : MonoBehaviour
             rend.material.color = Color.gray;
             if (levelManager.CheckWinTiles())
             {
-                gameManager.GameOver(true);
+                levelManager.RoundOver(collision.gameObject.GetComponent<PlayerMovement>().playerNumber);
             }
         }
     }

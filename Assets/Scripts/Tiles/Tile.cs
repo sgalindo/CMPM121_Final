@@ -6,7 +6,6 @@ public class Tile : MonoBehaviour
 {
     [SerializeField] float fallSpeed = 5f;
     [SerializeField] float rotateSpeed = 5f;
-    [SerializeField] float fadeSpeed = 5f;
     private Vector3 lowestPoint;
     private bool isFalling = false;
 

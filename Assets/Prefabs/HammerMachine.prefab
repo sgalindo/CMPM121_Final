@@ -104,6 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a5343b835a94684cb1430c3b05748a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destructionFactor: 0.5
 --- !u!1 &3451795557069723866
 GameObject:
   m_ObjectHideFlags: 0
@@ -5097,7 +5098,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 735579b0606e97041856ea7aa8cfa9b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 0}
   moveSpeed: 15
   hammerDownSpeed: 50
   hammerUpSpeed: 25
   hammerCooldown: 1
+  shakeDuration: 0.2
+  shakeStrength: 0.2

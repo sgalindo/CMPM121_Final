@@ -27,7 +27,7 @@ public class LevelGenerator : MonoBehaviour
         if (generate)
         {
             DestroyTiles();
-            GenerateLevel(Vector3.zero, levelHeight, levelWidth, levelPadding, numWinTiles, minWinTileDistance);
+            GenerateLevel(Vector3.zero, levelHeight, levelWidth, levelPadding);
             generate = false;
         }
     }
@@ -53,10 +53,42 @@ public class LevelGenerator : MonoBehaviour
     // numRows: Number of rows in the grid.
     // numCols: Number of columns in the grid.
     // padding: Space between each tile.
+    /// <summary>
+    /// Instantiates a grid of tiles, along with its win tiles.
+    /// </summary>
+    /// <param name="position">Starting position of the first tile in the grid.</param>
+    /// <param name="numRows">Number of rows in the grid.</param>
+    /// <param name="numCols">Number of columns in the grid.</param>
+    /// <param name="padding">Space between each tile.</param></param>
+    public void GenerateLevel(Vector3 position, int numRows, int numCols, float padding)
+    {
+        // Dimensions of the tile prefab to space them correctly.
+        float tileHeight = tile.GetComponent<Renderer>().bounds.size.z;
+        float tileWidth = tile.GetComponent<Renderer>().bounds.size.x;
+
+        Vector3 oldPosition = position;
+
+        for (int i = 0; i < numRows; i++)
+        {
+            position.z = (i * (tileHeight + padding));
+
+            for (int j = 0; j < numCols; j++)
+            {
+                position.x = (j * (tileWidth + padding));
+                Instantiate(tile, position, Quaternion.identity);
+            }
+        }
+    }
+
+    // Instantiates a grid of tiles with randomly scattered win tiles.
+    // position: Starting position of the first tile in the grid.
+    // numRows: Number of rows in the grid.
+    // numCols: Number of columns in the grid.
+    // padding: Space between each tile.
     // numWinTiles: Number of win tiles to place on grid.
     // minWinTileDistance: Minimum distance between win tiles (in grid coordinates)
     /// <summary>
-    /// Instantiates a grid of tiles, along with its win tiles.
+    /// Instantiates a grid of tiles with randomly scattered win tiles.
     /// </summary>
     /// <param name="position">Starting position of the first tile in the grid.</param>
     /// <param name="numRows">Number of rows in the grid.</param>
@@ -64,7 +96,7 @@ public class LevelGenerator : MonoBehaviour
     /// <param name="padding">Space between each tile.</param>
     /// <param name="numWinTiles">Number of win tiles to place on grid.</param>
     /// <param name="minWinTileDistance">Minimum distance between win tiles (in grid coordinates)</param>
-    public void GenerateLevel(Vector3 position, int numRows, int numCols, float padding, int numWinTiles, int minWinTileDistance)
+    public void GenerateLevelWithWinTiles(Vector3 position, int numRows, int numCols, float padding, int numWinTiles, int minWinTileDistance)
     {
         // Dimensions of the tile prefab to space them correctly.
         float tileHeight = tile.GetComponent<Renderer>().bounds.size.z;
@@ -97,6 +129,7 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    // Checks the distance between current tile and all other win tiles
     private bool CheckDistance(List<Vector2> winTilePos, Vector2 curr, int minDistance)
     {
         for (int i = 0; i < winTilePos.Count; i++)

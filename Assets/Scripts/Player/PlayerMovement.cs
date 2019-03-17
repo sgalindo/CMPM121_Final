@@ -6,6 +6,14 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody rb;
     private Vector3 movementInput;
+    public int playerNumber = 0;
+    public Color playerColor;
+    public Hammer hammer;
+
+    /* --- Input Variables --- */
+    private string horizontalAxisName;
+    private string verticalAxisName;
+    private string jumpButtonName;
 
     /* ----------- Physics Parameters ------------- */
     [SerializeField] private float moveSpeed = 5f;
@@ -16,15 +24,21 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
     private int groundLayer;
 
-    private GameManager gm;
+    private LevelManager lm;
 
     // Start is called before the first frame update
     void Start()
     {
-        gm = GameObject.Find("GameManager(Clone)").GetComponent<GameManager>();
+        lm = GameObject.Find("GameManager(Clone)").GetComponent<LevelManager>();
         rb = GetComponent<Rigidbody>();
         isGrounded = false;
         groundLayer = LayerMask.NameToLayer("Ground");
+        GetComponent<Renderer>().material.color = playerColor;
+
+        // Assign input names
+        horizontalAxisName = "HorizontalPlayer" + playerNumber;
+        verticalAxisName = "VerticalPlayer" + playerNumber;
+        jumpButtonName = "Jump" + playerNumber;
     }
 
     // Update is called once per frame
@@ -50,26 +64,10 @@ public class PlayerMovement : MonoBehaviour
     {
         // Movement input (WASD)
         movementInput = Vector3.zero;
-
-        if (Input.GetKey(KeyCode.A))
-        {
-            movementInput += Vector3.left;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            movementInput += Vector3.right;
-        }
-        if (Input.GetKey(KeyCode.W))
-        {
-            movementInput += Vector3.forward;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            movementInput += Vector3.back;
-        }
+        movementInput = new Vector3(Input.GetAxis(horizontalAxisName), 0f, Input.GetAxis(verticalAxisName));
 
         // Jump input
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetButtonDown(jumpButtonName))
         {
             Jump();
         }
@@ -101,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
     // Kill the player when the hammer falls on them or when they fall off the map.
     public void Kill()
     {
-        gm.GameOver(false);
+        lm.RoundOver((playerNumber == 0) ? 1 : 0);
         Destroy(gameObject);
     }
 

@@ -1,21 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Hammer : MonoBehaviour
 {
+    // Player references
+    public GameObject player;
+    private PlayerMovement playerScript;
+
+    private CameraController cameraController; // Camera script reference for screen shake
+
     /* --- Private Variables --- */
     private Vector3 movementInput; // Vector that contains all directional input for the hammer machine's movement
     private bool hammerPressed = false; // If the hammer down button is pressed
+    private int playerNumber;
 
     private Rigidbody rb;                           // Hammer's Rigidbody component
     [SerializeField] private float moveSpeed = 1.0f;        // Speed at which the hammer machine moves (crane-like movement)
     [SerializeField] private float hammerDownSpeed = 10f;   // Speed at which the hammer drops
     [SerializeField] private float hammerUpSpeed = 2f;      // Speed at which the hammer is raised
     [SerializeField] private float hammerCooldown = 2f;     // Time to wait before hammer is raised after hitting the ground
-    [SerializeField] private float t = 1.5f; // t value for easing function
+    [SerializeField] private float shakeDuration = 0.2f; // Duration of screen shake in seconds
+    [SerializeField] private float shakeStrength = 0.09f; // Strength of screen shake
 
-    //private float hammerCurrentSpeed = 1f;
+    /* --- Input Variables --- */
+    private string horizontalAxisName;
+    private string verticalAxisName;
+    private string smashButtonName;
 
     // References to children of Hammer
     private GameObject hammerHead;
@@ -33,6 +45,8 @@ public class Hammer : MonoBehaviour
     private float timestamp = 0f; // Timestamp variable for cooldown checks
     private float startTime = 0f;
 
+    [HideInInspector] public bool canMove = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,6 +59,18 @@ public class Hammer : MonoBehaviour
         // Y value of the lowest point for the hammer = shadow's y position + (height of hammer / 2)
         hammerFloorHeight = shadow.transform.position.y + (hammerHead.GetComponent<Collider>().bounds.size.y / 2) - 1f;
         rb = GetComponent<Rigidbody>();
+
+        playerScript = player.GetComponent<PlayerMovement>();
+        playerNumber = playerScript.playerNumber;
+        GetComponentInChildren<Image>().color = playerScript.playerColor;
+        hammerHead.GetComponent<Renderer>().material.color = playerScript.playerColor;
+
+        // Assign input names
+        horizontalAxisName = "HorizontalHammer" + playerNumber;
+        verticalAxisName = "VerticalHammer" + playerNumber;
+        smashButtonName = "Smash" + playerNumber;
+
+        cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
     }
 
     // Update is called once per frame
@@ -64,6 +90,12 @@ public class Hammer : MonoBehaviour
             transform.position.z
         );
 
+        if (canMove)
+            GetInput();
+    }
+
+    private void GetInput()
+    {
         // Reset the movementInput at the start of each frame
         movementInput = Vector3.zero;
 
@@ -71,25 +103,10 @@ public class Hammer : MonoBehaviour
         if (!hammerDropping && !hammerDown)
         {
             /* --- MOVEMENT INPUT --- */
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                movementInput += Vector3.left;
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                movementInput += Vector3.right;
-            }
-            else if (Input.GetKey(KeyCode.UpArrow))
-            {
-                movementInput += Vector3.forward;
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                movementInput += Vector3.back;
-            }
-
+            movementInput = new Vector3(Input.GetAxis(horizontalAxisName), 0f, Input.GetAxis(verticalAxisName));
+            
             /* --- HAMMER DOWN ---*/
-            if (Input.GetKeyDown(KeyCode.RightShift))
+            if (Input.GetButtonDown(smashButtonName))
             {
                 hammerPressed = true;
             }
@@ -135,6 +152,7 @@ public class Hammer : MonoBehaviour
             if (!hammerDown)
             {
                 shadow.GetComponent<ParticleSystem>().Play();
+                cameraController.ShakeCamera(shakeDuration, shakeStrength);
 
                 // Enable collisions so things don't go through it when on the ground.
                 // Also make it kinematic so that players can't push it around.
@@ -170,24 +188,10 @@ public class Hammer : MonoBehaviour
             hammerPressed = false;
         }
     }
-
-    private float EaseDown(float value)
-    {
-        return value * t;
-    }
-
+   
     // Public accessor for hammerDown.
     public bool GetHammerDown()
     {
         return hammerDown;
-    }
-
-    public static float EaseInOutQuad(float start, float end, float value)
-    {
-        value /= .5f;
-        end -= start;
-        if (value < 1) return end * 0.5f * value * value + start;
-        value--;
-        return -end * 0.5f * (value * (value - 2) - 1) + start;
     }
 }
