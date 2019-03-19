@@ -32,6 +32,7 @@ public class Hammer : MonoBehaviour
     // References to children of Hammer
     private GameObject hammerHead;
     private GameObject shadow;
+    private Image shadowImage;
 
     private Vector3 hammerCeiling;     // Top position of hammer
     private float hammerCeilingHeight; // Y value for hammerCeiling
@@ -46,6 +47,8 @@ public class Hammer : MonoBehaviour
     private float startTime = 0f;
 
     [HideInInspector] public bool canMove = true;
+
+    private IEnumerator flashColor;
 
     // Start is called before the first frame update
     void Start()
@@ -62,7 +65,8 @@ public class Hammer : MonoBehaviour
 
         playerScript = player.GetComponent<PlayerMovement>();
         playerNumber = playerScript.playerNumber;
-        GetComponentInChildren<Image>().color = playerScript.playerColor;
+        shadowImage = GetComponentInChildren<Image>();
+        shadowImage.color = playerScript.playerColor;
         hammerHead.GetComponent<Renderer>().material.color = playerScript.playerColor;
 
         // Assign input names
@@ -92,6 +96,8 @@ public class Hammer : MonoBehaviour
 
         if (canMove)
             GetInput();
+        else
+            movementInput = Vector3.zero;
     }
 
     private void GetInput()
@@ -188,10 +194,40 @@ public class Hammer : MonoBehaviour
             hammerPressed = false;
         }
     }
+
+    IEnumerator FlashColor(float speed)
+    {
+        WaitForSeconds interval = new WaitForSeconds(speed);
+        while (true)
+        {
+            shadowImage.color = Color.magenta;
+            yield return interval;
+            shadowImage.color = playerScript.playerColor;
+            yield return interval;
+        }
+    }
    
     // Public accessor for hammerDown.
     public bool GetHammerDown()
     {
         return hammerDown;
+    }
+
+    public void SetSpeed(float moveMult, float downMult, float upMult, float coolDownMult, bool powerup)
+    {
+        moveSpeed *= moveMult;
+        hammerDownSpeed *= downMult;
+        hammerUpSpeed *= upMult;
+        hammerCooldown *= coolDownMult;
+
+        if (powerup)
+        {
+            flashColor = FlashColor(0.25f);
+            StartCoroutine(flashColor);
+        }
+        else if (flashColor != null)
+        {
+            StopCoroutine(flashColor);
+        }
     }
 }

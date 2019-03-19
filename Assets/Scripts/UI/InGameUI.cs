@@ -5,22 +5,36 @@ using UnityEngine.UI;
 
 public class InGameUI : MonoBehaviour
 {
+    LevelManager lm;
+
     private Text winText;
-    private Text continueText;
+    private Button continueButton;
+    private Button quitButton;
     private Text scoreText;
+    private Text powerupText;
     private Text playerScoreText0;
     private Text playerScoreText1;
+    private Text countdownText;
     private Image background;
+
+    private IEnumerator flashText;
 
     // Start is called before the first frame update
     void Awake()
     {
         winText = transform.Find("Win_Text").GetComponent<Text>();
-        continueText = transform.Find("Continue_Text").GetComponent<Text>();
+        continueButton = transform.Find("Continue_Button").GetComponent<Button>();
+        quitButton = transform.Find("Quit_Button").GetComponent<Button>();
         scoreText = transform.Find("Score_Text").GetComponent<Text>();
+        powerupText = transform.Find("Powerup_Text").GetComponent<Text>();
+        countdownText = transform.Find("Countdown_Text").GetComponent<Text>();
         playerScoreText0 = scoreText.transform.Find("PlayerScore_Text0").GetComponent<Text>();
         playerScoreText1 = scoreText.transform.Find("PlayerScore_Text1").GetComponent<Text>();
         background = transform.Find("Background").GetComponent<Image>();
+
+        lm = GameObject.Find("GameManager(Clone)").GetComponent<LevelManager>();
+        continueButton.onClick.AddListener(ContinueOnClick);
+        quitButton.onClick.AddListener(QuitOnClick);
 
         MoveScore(true);
     }
@@ -31,10 +45,34 @@ public class InGameUI : MonoBehaviour
         
     }
 
-    public void HideText(bool enabled)
+    private IEnumerator FlashText(float speed)
+    {
+        WaitForSeconds interval = new WaitForSeconds(speed);
+        while (true)
+        {
+            powerupText.color = Color.white;
+            yield return interval;
+            powerupText.color = Color.magenta;
+            yield return interval;
+        }
+    }
+
+    private void ContinueOnClick()
+    {
+        lm.Continue();
+    }
+
+    private void QuitOnClick()
+    {
+        lm.Quit();
+    }
+
+    public void HideRoundOverText(bool enabled)
     {
         winText.enabled = enabled;
-        continueText.enabled = enabled;
+        continueButton.gameObject.SetActive(enabled);
+        quitButton.gameObject.SetActive(enabled);
+        powerupText.enabled = false;
         background.enabled = enabled;
     }
 
@@ -43,6 +81,25 @@ public class InGameUI : MonoBehaviour
         scoreText.enabled = enabled;
         playerScoreText0.enabled = enabled;
         playerScoreText1.enabled = enabled;
+    }
+
+    public void HideCountdown(bool enabled)
+    {
+        countdownText.enabled = enabled;
+    }
+
+    public void ShowPowerupText(bool enabled)
+    {
+        powerupText.enabled = enabled;
+        if (enabled)
+        {
+            flashText = FlashText(0.25f);
+            StartCoroutine(flashText);
+        }
+        else if (flashText != null)
+        {
+            StopCoroutine(flashText);
+        }
     }
 
     public void SetWinText(int winner)
@@ -68,7 +125,31 @@ public class InGameUI : MonoBehaviour
         {
             scoreText.rectTransform.position = new Vector3((Screen.width + scoreText.rectTransform.sizeDelta.x) / 2, (Screen.height + scoreText.rectTransform.sizeDelta.y) / 2, 0f);
         }
-            
+    }
+
+    public void ShowCountdown(bool enabled, string s, float interval)
+    {
+        countdownText.text = s;
+        countdownText.enabled = enabled;
+        StartCoroutine(SizeText(1f, interval));
+    }
+
+    IEnumerator SizeText(float amount, float interval)
+    {
+        float time = 0;
+        int originalSize = countdownText.fontSize;
+        while (time < interval)
+        {
+            countdownText.fontSize = Mathf.FloorToInt(countdownText.fontSize + amount);
+            time += Time.deltaTime;
+            yield return 0;
+        }
+        countdownText.fontSize = originalSize;
+    }
+
+    public void SetContinueText(string s)
+    {
+        continueButton.transform.GetChild(0).GetComponent<Text>().text = s;
     }
 
 }

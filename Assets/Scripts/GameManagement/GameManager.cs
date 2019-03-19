@@ -34,7 +34,8 @@ public class GameManager : MonoBehaviour
 
     void OnSceneWasLoaded(Scene scene, LoadSceneMode mode)
     {
-        levelManager.InitLevel(numRounds, false, newGame);
+        if (SceneManager.GetActiveScene().buildIndex > 0)
+            levelManager.InitLevel(numRounds, false, newGame);
     }
 
     private void Start()

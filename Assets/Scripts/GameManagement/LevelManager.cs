@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -21,23 +22,13 @@ public class LevelManager : MonoBehaviour
     {
         gm = GetComponent<GameManager>();
         levelGen = GetComponent<LevelGenerator>();
-        players = new PlayerMovement[2] { GameObject.Find("Player0").GetComponent<PlayerMovement>(), GameObject.Find("Player1").GetComponent<PlayerMovement>()};
+        players = new PlayerMovement[2];
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Start") && restartEnabled)
-        {
-            if (playerScores[0] < numRounds && playerScores[1] < numRounds)
-            {
-                ResetRound();
-            }
-            else
-            {
-                ResetLevel();
-            }
-        }
+
     }
 
     public void InitLevel(int numRounds, bool winTileMode, bool newGame)
@@ -46,13 +37,21 @@ public class LevelManager : MonoBehaviour
         this.numRounds = numRounds;
         restartEnabled = false;
 
+        if (SceneManager.GetActiveScene().buildIndex > 0)
+        {
+            players[0] = GameObject.Find("Player0").GetComponent<PlayerMovement>();
+            players[1] = GameObject.Find("Player1").GetComponent<PlayerMovement>();
+        }
+
+        EnablePlayerMovement(false);
+
         if (newGame)
         {
             ResetValues();
         }
 
         inGameUI.SetScore(playerScores[0], playerScores[1]);
-        inGameUI.HideText(false);
+        inGameUI.HideRoundOverText(false);
         inGameUI.HideScore(true);
 
         if (winTileMode)
@@ -62,6 +61,23 @@ public class LevelManager : MonoBehaviour
         }
         else
             levelGen.GenerateLevel(Vector3.zero, 14, 20, 0.15f);
+
+        StartCoroutine(Countdown(1f));
+    }
+
+    private IEnumerator Countdown(float time)
+    {
+        WaitForSeconds interval = new WaitForSeconds(time);
+        inGameUI.ShowCountdown(true, "3", time);
+        yield return interval;
+        inGameUI.ShowCountdown(true, "2", time);
+        yield return interval;
+        inGameUI.ShowCountdown(true, "1", time);
+        yield return interval;
+        inGameUI.ShowCountdown(true, "Go!", time);
+        yield return interval;
+        inGameUI.HideCountdown(false);
+        EnablePlayerMovement(true);
     }
 
     private void ResetRound()
@@ -85,6 +101,14 @@ public class LevelManager : MonoBehaviour
         playerScores[1] = 0;
     }
 
+    private void EnablePlayerMovement(bool enabled)
+    {
+        for (int i = 0; i < players.Length; i++)
+        {
+            players[i].SetCanMove(enabled);
+        }
+    }
+
     /* --- Public functions --- */
     public bool CheckWinTiles()
     {
@@ -105,10 +129,34 @@ public class LevelManager : MonoBehaviour
             players[0].hammer.canMove = false;
             players[1].hammer.canMove = false;
             inGameUI.SetWinText(winner);
-            inGameUI.HideText(true);
+            inGameUI.HideRoundOverText(true);
             restartEnabled = true;
             playerScores[winner] += 1;
             inGameUI.SetScore(playerScores[0], playerScores[1]);
+            if (playerScores[0] == numRounds || playerScores[1] == numRounds)
+                inGameUI.SetContinueText("Restart");
         }
+    }
+
+    public void PowerupEnabled(bool enabled)
+    {
+        inGameUI.ShowPowerupText(enabled);
+    }
+
+    public void Continue()
+    {
+        if (playerScores[0] < numRounds && playerScores[1] < numRounds)
+        {
+            ResetRound();
+        }
+        else
+        {
+            ResetLevel();
+        }
+    }
+
+    public void Quit()
+    {
+        gm.LoadScene("MainMenu");
     }
 }

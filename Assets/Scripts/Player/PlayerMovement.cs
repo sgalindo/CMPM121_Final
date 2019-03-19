@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     public int playerNumber = 0;
     public Color playerColor;
     public Hammer hammer;
+    private bool canMove = false;
 
     /* --- Input Variables --- */
     private string horizontalAxisName;
@@ -19,10 +20,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float maxSpeed = 30f;
     [SerializeField] private float jumpForce = 50f;
+    [SerializeField] private float deathHeight = -25f;
 
     /* --- Jump Variables --- */
     private bool isGrounded;
     private int groundLayer;
+
+    /* --- Powerup Parameters --- */
+    [SerializeField] private float fastHammerDuration = 10f;
 
     private LevelManager lm;
 
@@ -44,8 +49,12 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GetInput();
-        if (transform.position.y <= -50f)
+        if (canMove)
+            GetInput();
+        else
+            movementInput = Vector3.zero;
+
+        if (transform.position.y <= deathHeight)
         {
             Kill();
         }
@@ -103,14 +112,33 @@ public class PlayerMovement : MonoBehaviour
         Destroy(gameObject);
     }
 
+    public void PowerUp()
+    {
+        StartCoroutine(FastHammer(fastHammerDuration));
+    }
+
+    IEnumerator FastHammer(float duration)
+    {
+        hammer.SetSpeed(2f, 1.5f, 1.5f, 0.5f, true);
+        lm.PowerupEnabled(true);
+
+        yield return new WaitForSeconds(duration);
+
+        hammer.SetSpeed(0.5f, 0.75f, 0.75f, 2f, false);
+        lm.PowerupEnabled(false);
+    }
+
     /* ------------------------ COLLISION --------------------------------- */ 
     // Collision check with ground to see if player is grounded.
     private void OnCollisionStay(Collision collision)
     {
         if (collision.gameObject.layer == groundLayer)
         {
-            if (!isGrounded) isGrounded = true;
-            transform.parent = collision.transform;
+            if (!collision.gameObject.GetComponent<Tile>().IsFalling)
+            {
+                if (!isGrounded) isGrounded = true;
+                transform.parent = collision.transform;
+            }
         }
     }
     private void OnCollisionExit(Collision collision)
@@ -119,5 +147,11 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.parent = null;
         }
+    }
+    
+    public void SetCanMove(bool enabled)
+    {
+        canMove = enabled;
+        hammer.canMove = enabled;
     }
 }

@@ -5105,3 +5105,4 @@ MonoBehaviour:
   hammerCooldown: 1
   shakeDuration: 0.2
   shakeStrength: 0.2
+  canMove: 1

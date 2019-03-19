@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
 public class LevelGenerator : MonoBehaviour
 {
     public GameObject tile;
     public GameObject winTile;
-    [SerializeField] [Range(1,50)] int levelHeight = 5;
-    [SerializeField] [Range(1, 50)] int levelWidth = 5;
-    [SerializeField] [Range(0f, 1f)] float levelPadding = 0.1f;
+    [SerializeField] [Range(1,50)] private int levelHeight = 5;
+    [SerializeField] [Range(1, 50)] private int levelWidth = 5;
+    [SerializeField] [Range(0f, 1f)] private float levelPadding = 0.1f;
     [SerializeField] private int numWinTiles = 3;
     [SerializeField] private int minWinTileDistance = 5;
+    [SerializeField] private float powerupSpawnInterval = 20f;
 
-    public bool generate = false;
+    private static GameObject[,] levelTiles;
+
+    private IEnumerator powerupInterval;
 
     // Start is called before the first frame update
     void Start()
@@ -23,13 +25,8 @@ public class LevelGenerator : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        if (generate)
-        {
-            DestroyTiles();
-            GenerateLevel(Vector3.zero, levelHeight, levelWidth, levelPadding);
-            generate = false;
-        }
+    { 
+
     }
 
     // Destroy all tiles in level (regular tile and win tile)
@@ -47,6 +44,40 @@ public class LevelGenerator : MonoBehaviour
             DestroyImmediate(winTiles[i]);
         }
     }
+
+    // Checks the distance between current tile and all other win tiles
+    private bool CheckDistance(List<Vector2> winTilePos, Vector2 curr, int minDistance)
+    {
+        for (int i = 0; i < winTilePos.Count; i++)
+        {
+            if (Mathf.Abs(curr.x - winTilePos[i].x) < minDistance || Mathf.Abs(curr.y - winTilePos[i].y) < minDistance)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void PlacePowerup()
+    {
+        GameObject powerTile = null;
+        while (powerTile == null)
+        {
+            powerTile = levelTiles[Random.Range(0, levelTiles.GetLength(0) - 1), Random.Range(0, levelTiles.GetLength(1) - 1)];
+        }
+        powerTile.GetComponent<Tile>().SetPowerup();
+    }
+
+    IEnumerator PowerupInterval(float duration)
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(duration);
+            PlacePowerup();
+        }
+    }
+
+    /* --- Public Functions --- */
 
     // Instantiates a grid of tiles.
     // position: Starting position of the first tile in the grid.
@@ -66,6 +97,8 @@ public class LevelGenerator : MonoBehaviour
         float tileHeight = tile.GetComponent<Renderer>().bounds.size.z;
         float tileWidth = tile.GetComponent<Renderer>().bounds.size.x;
 
+        levelTiles = new GameObject[numRows, numCols];
+
         Vector3 oldPosition = position;
 
         for (int i = 0; i < numRows; i++)
@@ -75,9 +108,16 @@ public class LevelGenerator : MonoBehaviour
             for (int j = 0; j < numCols; j++)
             {
                 position.x = (j * (tileWidth + padding));
-                Instantiate(tile, position, Quaternion.identity);
+                GameObject newTile = Instantiate(tile, position, Quaternion.identity);
+                newTile.GetComponent<Tile>().SetPosition(i, j);
+                levelTiles[i, j] = newTile;
             }
         }
+
+        if (powerupInterval != null)
+            StopCoroutine(powerupInterval);
+        powerupInterval = PowerupInterval(powerupSpawnInterval);
+        StartCoroutine(powerupInterval);
     }
 
     // Instantiates a grid of tiles with randomly scattered win tiles.
@@ -128,17 +168,9 @@ public class LevelGenerator : MonoBehaviour
             }
         }
     }
-
-    // Checks the distance between current tile and all other win tiles
-    private bool CheckDistance(List<Vector2> winTilePos, Vector2 curr, int minDistance)
+    
+    public void RemoveTile(Vector2 pos)
     {
-        for (int i = 0; i < winTilePos.Count; i++)
-        {
-            if (Mathf.Abs(curr.x - winTilePos[i].x) < minDistance || Mathf.Abs(curr.y - winTilePos[i].y) < minDistance)
-            {
-                return false;
-            }
-        }
-        return true;
+        levelTiles[(int)pos.x, (int)pos.y] = null;
     }
 }
