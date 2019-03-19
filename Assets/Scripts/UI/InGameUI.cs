@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class InGameUI : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class InGameUI : MonoBehaviour
     private Image background;
 
     private IEnumerator flashText;
+    private EventSystem es;
 
     // Start is called before the first frame update
     void Awake()
@@ -35,6 +37,8 @@ public class InGameUI : MonoBehaviour
         lm = GameObject.Find("GameManager(Clone)").GetComponent<LevelManager>();
         continueButton.onClick.AddListener(ContinueOnClick);
         quitButton.onClick.AddListener(QuitOnClick);
+
+        es = GameObject.Find("EventSystem").GetComponent<EventSystem>();
 
         MoveScore(true);
     }
@@ -74,6 +78,8 @@ public class InGameUI : MonoBehaviour
         quitButton.gameObject.SetActive(enabled);
         powerupText.enabled = false;
         background.enabled = enabled;
+        es.SetSelectedGameObject(null);
+        es.SetSelectedGameObject(es.firstSelectedGameObject);
     }
 
     public void HideScore(bool enabled)
