@@ -16,7 +16,7 @@ public class WinTile : MonoBehaviour
     void Awake()
     {
         rend = GetComponent<Renderer>();
-        GameObject gm = GameObject.Find("GameManager(Clone)");
+        GameObject gm = GameObject.Find("GameManager");
         levelManager = gm.GetComponent<LevelManager>();
         gameManager = gm.GetComponent<GameManager>();
     }

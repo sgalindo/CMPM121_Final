@@ -35,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        lm = GameObject.Find("GameManager(Clone)").GetComponent<LevelManager>();
+        lm = GameObject.Find("GameManager").GetComponent<LevelManager>();
         rb = GetComponent<Rigidbody>();
         isGrounded = false;
         groundLayer = LayerMask.NameToLayer("Ground");
@@ -106,6 +106,7 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
+            sounds[0].pitch = Random.Range(0.9f, 1.1f);
             sounds[0].Play();
         }
     }
@@ -114,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
     public void Kill()
     {
         lm.RoundOver((playerNumber == 0) ? 1 : 0);
-        
+        GetComponent<Renderer>().enabled = false;
         Destroy(gameObject, sounds[2].clip.length);
     }
 

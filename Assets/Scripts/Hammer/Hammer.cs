@@ -163,6 +163,7 @@ public class Hammer : MonoBehaviour
             {
                 shadow.GetComponent<ParticleSystem>().Play();
                 cameraController.ShakeCamera(shakeDuration, shakeStrength);
+                sound.pitch = Random.Range(0.8f, 1.2f);
                 sound.Play();
 
                 // Enable collisions so things don't go through it when on the ground.

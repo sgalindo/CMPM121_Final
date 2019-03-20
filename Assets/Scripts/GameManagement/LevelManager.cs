@@ -62,6 +62,12 @@ public class LevelManager : MonoBehaviour
         else
             levelGen.GenerateLevel(Vector3.zero, 14, 20, 0.15f);
 
+        StartCoroutine(Delay(1f));
+    }
+
+    private IEnumerator Delay(float time)
+    {
+        yield return new WaitForSeconds(time);
         StartCoroutine(Countdown(1f));
     }
 

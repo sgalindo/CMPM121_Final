@@ -35,7 +35,7 @@ public class InGameUI : MonoBehaviour
         playerScoreText1 = scoreText.transform.Find("PlayerScore_Text1").GetComponent<Text>();
         background = transform.Find("Background").GetComponent<Image>();
 
-        lm = GameObject.Find("GameManager(Clone)").GetComponent<LevelManager>();
+        lm = GameObject.Find("GameManager").GetComponent<LevelManager>();
         continueButton.onClick.AddListener(ContinueOnClick);
         quitButton.onClick.AddListener(QuitOnClick);
 
@@ -112,7 +112,7 @@ public class InGameUI : MonoBehaviour
 
     public void SetWinText(int winner)
     {
-        winText.text = "Player " + (winner + 1).ToString() + " wins!";
+        winText.text = ((winner == 0) ? "Red" : "Blue") + " wins!";
         winText.color = (winner == 0) ? Color.red : Color.blue;
         MoveScore(false);
     }

@@ -25,7 +25,7 @@ public class Tile : MonoBehaviour
     {
         lowestPoint = transform.position + (-transform.up * 20f);
         rend = GetComponent<Renderer>();
-        lg = GameObject.Find("GameManager(Clone)").GetComponent<LevelGenerator>();
+        lg = GameObject.Find("GameManager").GetComponent<LevelGenerator>();
         tileColor = rend.material.color;
         powerColor = Color.magenta;
     }
