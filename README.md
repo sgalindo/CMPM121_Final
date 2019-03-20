@@ -1,11 +1,11 @@
 # CMPM121_Final - *Hammer Time!*
 
-#How to Play:
+## How to Play:
 **NOTE: This game can only be played with Xbox controllers.**
 
 Two-player hammer arena. Smash your opponent with your crane-hammer!
 
-###Controls:
+### Controls:
 Move Player - Left Stick
 Move Hammer - Right Stick
 Jump        - Left Bumper
