@@ -20,6 +20,7 @@ public class InGameUI : MonoBehaviour
 
     private IEnumerator flashText;
     private EventSystem es;
+    private AudioSource[] sounds;
 
     // Start is called before the first frame update
     void Awake()
@@ -39,6 +40,7 @@ public class InGameUI : MonoBehaviour
         quitButton.onClick.AddListener(QuitOnClick);
 
         es = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+        sounds = GetComponents<AudioSource>();
 
         MoveScore(true);
     }
@@ -135,6 +137,10 @@ public class InGameUI : MonoBehaviour
 
     public void ShowCountdown(bool enabled, string s, float interval)
     {
+        if (s == "Go!")
+            sounds[1].Play();
+        else
+            sounds[0].Play();
         countdownText.text = s;
         countdownText.enabled = enabled;
         StartCoroutine(SizeText(1f, interval));
@@ -156,6 +162,16 @@ public class InGameUI : MonoBehaviour
     public void SetContinueText(string s)
     {
         continueButton.transform.GetChild(0).GetComponent<Text>().text = s;
+    }
+
+    public void PlayButtonSelect() 
+    {
+        sounds[2].Play();
+    }
+
+    public void PlayButtonSubmit() 
+    {
+        sounds[3].Play();
     }
 
 }

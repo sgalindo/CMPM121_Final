@@ -30,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float fastHammerDuration = 10f;
 
     private LevelManager lm;
+    private AudioSource[] sounds;
 
     // Start is called before the first frame update
     void Start()
@@ -39,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = false;
         groundLayer = LayerMask.NameToLayer("Ground");
         GetComponent<Renderer>().material.color = playerColor;
+        sounds = GetComponents<AudioSource>();
 
         // Assign input names
         horizontalAxisName = "HorizontalPlayer" + playerNumber;
@@ -56,6 +58,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (transform.position.y <= deathHeight)
         {
+            if (!sounds[2].isPlaying)
+                sounds[2].Play();
             Kill();
         }
     }
@@ -102,6 +106,7 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
+            sounds[0].Play();
         }
     }
 
@@ -109,7 +114,8 @@ public class PlayerMovement : MonoBehaviour
     public void Kill()
     {
         lm.RoundOver((playerNumber == 0) ? 1 : 0);
-        Destroy(gameObject);
+        
+        Destroy(gameObject, sounds[2].clip.length);
     }
 
     public void PowerUp()
@@ -121,6 +127,7 @@ public class PlayerMovement : MonoBehaviour
     {
         hammer.SetSpeed(2f, 1.5f, 1.5f, 0.5f, true);
         lm.PowerupEnabled(true);
+        sounds[1].Play();
 
         yield return new WaitForSeconds(duration);
 

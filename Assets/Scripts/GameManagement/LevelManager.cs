@@ -124,6 +124,12 @@ public class LevelManager : MonoBehaviour
 
     public void RoundOver(int winner)
     {
+        StartCoroutine(RoundOverDelay(winner));
+    }
+
+    private IEnumerator RoundOverDelay(int winner)
+    {
+        yield return new WaitForSeconds(2f);
         if (!restartEnabled)
         {
             players[0].hammer.canMove = false;

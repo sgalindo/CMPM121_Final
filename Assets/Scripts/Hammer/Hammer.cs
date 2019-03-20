@@ -50,6 +50,8 @@ public class Hammer : MonoBehaviour
 
     private IEnumerator flashColor;
 
+    private AudioSource sound;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -75,6 +77,8 @@ public class Hammer : MonoBehaviour
         smashButtonName = "Smash" + playerNumber;
 
         cameraController = GameObject.Find("Main Camera").GetComponent<CameraController>();
+
+        sound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -159,6 +163,7 @@ public class Hammer : MonoBehaviour
             {
                 shadow.GetComponent<ParticleSystem>().Play();
                 cameraController.ShakeCamera(shakeDuration, shakeStrength);
+                sound.Play();
 
                 // Enable collisions so things don't go through it when on the ground.
                 // Also make it kinematic so that players can't push it around.

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 250540113061879360}
   - component: {fileID: 250540113061879363}
   - component: {fileID: 250540113061879362}
+  - component: {fileID: 8984349945391624880}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -45,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27756590bcf4b5b42b0e1772cd04c46f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  newGame: 1
+  numRounds: 3
 --- !u!114 &250540113061879363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,4 +79,23 @@ MonoBehaviour:
   levelPadding: 0.15
   numWinTiles: 3
   minWinTileDistance: 5
-  generate: 0
+  powerupSpawnInterval: 20
+--- !u!114 &8984349945391624880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250540113061879367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18302d3e8edb964a9799b60f3fa159a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
