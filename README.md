@@ -1,8 +1,6 @@
 # CMPM121_Final - *Hammer Time!*
-=================================
 
-##How to Play:
-===============
+#How to Play:
 **NOTE: This game can only be played with Xbox controllers.**
 
 Two-player hammer arena. Smash your opponent with your crane-hammer!
@@ -14,7 +12,6 @@ Jump        - Left Bumper
 Smash       - Right Bumper
 
 # Credits:
-=============
 Game created by - Salvador Galindo
 Sound FX        - Salvador Galindo
 
